@@ -154,18 +154,36 @@ const evidenceInput = document.getElementById("evidenceInput");
 const outcomeInput = document.getElementById("outcomeInput");
 const supportInput = document.getElementById("supportInput");
 
+function addDeleteButton(row) {
+  const actionCell = row.cells[row.cells.length - 1];
+  const button = actionCell.querySelector(".row-delete");
+  if (!button) return;
+  button.addEventListener("click", () => {
+    row.remove();
+    showToast("Row deleted");
+  });
+}
+
+Array.from(pipTable.tBodies[0].rows).forEach(addDeleteButton);
+
 document.getElementById("addPipRow").addEventListener("click", () => {
   const row = pipTable.tBodies[0].insertRow();
   [concernInput.value, evidenceInput.value, outcomeInput.value, supportInput.value, "Add review evidence"].forEach((value) => {
     const cell = row.insertCell();
     cell.textContent = value.trim();
   });
+  const actionCell = row.insertCell();
+  actionCell.innerHTML = '<button class="row-delete" type="button">Delete</button>';
+  addDeleteButton(row);
   showToast("Added to table");
 });
 
 function tableToText(delimiter = "\t") {
   return Array.from(pipTable.rows)
-    .map((row) => Array.from(row.cells).map((cell) => `"${cell.innerText.replaceAll('"', '""')}"`).join(delimiter))
+    .map((row) => Array.from(row.cells)
+      .slice(0, -1)
+      .map((cell) => `"${cell.innerText.replaceAll('"', '""')}"`)
+      .join(delimiter))
     .join("\n");
 }
 
